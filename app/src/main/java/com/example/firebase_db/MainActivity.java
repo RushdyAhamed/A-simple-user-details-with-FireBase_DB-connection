@@ -19,9 +19,17 @@ import com.google.firebase.database.ValueEventListener;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
     EditText txtID,txtName,txtAddress,txtContact;
-    Button btnSave,btnShow;
+    Button btnSave,btnShow,btnUpdate,btnDelete;
     DatabaseReference dbRef;
     Student std;
+
+    //Method to clear all user inputs
+    private void clearControls(){
+        txtID.setText("");
+        txtName.setText("");
+        txtAddress.setText("");
+        txtContact.setText("");
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,11 +43,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         btnSave = findViewById(R.id.btnsave);
         btnShow = findViewById(R.id.btnshow);
-        //btnSave = findViewById(R.id.btnsave);
-        //btnSave = findViewById(R.id.btnsave);
+        btnUpdate = findViewById(R.id.btnUpdt);
+        btnDelete = findViewById(R.id.btnDelt);
 
         std = new Student();
+
         btnSave.setOnClickListener(this);
+        btnUpdate.setOnClickListener(this);
+        btnDelete.setOnClickListener(this);
+
     }
     private void show()
     {
@@ -54,12 +66,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     txtContact.setText(dataSnapshot.child("conNo").getValue().toString());
                 }
                 else{
-                    Toast.makeText(getApplicationContext(), "No Source to Display", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "No Source to Display", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
 
@@ -74,34 +86,93 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         try {
             if (TextUtils.isEmpty(txtID.getText().toString()))
             {
-                Toast.makeText(getApplicationContext(), "Please Enter an ID", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Please Enter an ID", Toast.LENGTH_SHORT).show();
             }
             else if (TextUtils.isEmpty(txtName.getText().toString()))
             {
-                Toast.makeText(getApplicationContext(), "Please Enter a Name", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Please Enter a Name", Toast.LENGTH_SHORT).show();
             }
             else if (TextUtils.isEmpty(txtAddress.getText().toString()))
             {
-                Toast.makeText(getApplicationContext(), "Please Enter an Address", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Please Enter an Address", Toast.LENGTH_SHORT).show();
             }
             else
             {
-                std.setID(txtID.getText().toString());
-                std.setName(txtName.getText().toString());
-                std.setAddress(txtAddress.getText().toString());
+                //Take inputs from the user and assigning them to this instance (std) of the Student...
+                std.setID(txtID.getText().toString().trim());
+                std.setName(txtName.getText().toString().trim());
+                std.setAddress(txtAddress.getText().toString().trim());
                 std.setConNo(Integer.parseInt(txtContact.getText().toString().trim()));
 
                 //dbRef.push().setValue(std);
 
                 dbRef.child("Std1").setValue(std);
                 clear();
-                Toast.makeText(getApplicationContext(), "Data Saved Successfully", Toast.LENGTH_LONG).show();
-
+                Toast.makeText(getApplicationContext(), "Data Saved Successfully", Toast.LENGTH_SHORT).show();
+                clearControls();
             }
         }
         catch (NumberFormatException e){
-            Toast.makeText(getApplicationContext(), "Please Contact Number", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Invalid Contact Number", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void Update()
+    {
+        DatabaseReference updRef = FirebaseDatabase.getInstance().getReference().child("Student");
+        updRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.hasChild("Std1")) {
+                    try {
+                        std.setID(txtID.getText().toString().trim());
+                        std.setName(txtName.getText().toString().trim());
+                        std.setAddress(txtAddress.getText().toString().trim());
+                        std.setConNo(Integer.parseInt(txtContact.getText().toString().trim()));
+
+                        dbRef = FirebaseDatabase.getInstance().getReference().child("Student").child("Std1");
+                        dbRef.setValue(std);
+                        clearControls();
+
+                        Toast.makeText(MainActivity.this, "Data Updated Successfully", Toast.LENGTH_SHORT).show();
+                    } catch (NumberFormatException e) {
+                        Toast.makeText(getApplicationContext(), "Invalid Contact Number", Toast.LENGTH_SHORT).show();
+                    }
+                }else{
+                    Toast.makeText(getApplicationContext(), "No Source to Update", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+    }
+
+    private void Delete()
+    {
+        DatabaseReference delRef = FirebaseDatabase.getInstance().getReference().child("Student");
+        delRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.hasChild("Std1")){
+                   dbRef = FirebaseDatabase.getInstance().getReference().child("Student").child("Std1");
+                   dbRef.removeValue();
+                   clearControls();
+                    Toast.makeText(MainActivity.this, "Data Deleted Successfully", Toast.LENGTH_SHORT).show();
+                }
+                else{
+                    Toast.makeText(getApplicationContext(), "No Source to Delete", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+
+
+        });
     }
 
     @Override
@@ -111,6 +182,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
 
             case R.id.btnshow:show();
+                break;
+
+            case R.id.btnUpdt:Update();
+                break;
+
+            case R.id.btnDelt:Delete();
                 break;
         }
     }

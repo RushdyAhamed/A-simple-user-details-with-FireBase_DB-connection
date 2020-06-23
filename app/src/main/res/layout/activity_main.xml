@@ -92,7 +92,7 @@
         app:layout_constraintTop_toBottomOf="@+id/txtcontact" />
 
     <Button
-        android:id="@+id/button3"
+        android:id="@+id/btnUpdt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="126dp"
@@ -101,12 +101,12 @@
         android:layout_marginStart="38dp"
         android:layout_marginTop="22dp"
         android:text="update"
-        app:layout_constraintEnd_toStartOf="@+id/button4"
+        app:layout_constraintEnd_toStartOf="@+id/btnDelt"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnsave" />
 
     <Button
-        android:id="@+id/button4"
+        android:id="@+id/btnDelt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="44dp"
